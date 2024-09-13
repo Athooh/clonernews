@@ -1,26 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hacker News Live Updates</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker News Feed</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>Hacker News Live Feed</h1>
-  </header>
-  <main>
-    <section id="live-updates-section">
-      <div id="live-updates-banner">New updates available! <button id="refresh-btn">Refresh</button></div>
-    </section>
-
-    <section id="news-section">
-      <ul id="news-list"></ul>
-      <button id="load-more">Load More</button>
-    </section>
-  </main>
-
-  <script src="scripts.js"></script>
+    <div class="container">
+        <main>
+            <!-- Main content area for posts -->
+            <h1>Hacker News Feed</h1>
+            <ul id="news-list"></ul>
+            <button id="load-more">Load More</button>
+            <div id="live-updates-banner">
+                New updates are available! <button id="refresh-btn">Refresh</button>
+            </div>
+        </main>
+        <aside id="sidebar">
+            <h2>New Stories</h2>
+            <ul id="new-stories-list"></ul>
+            <h2>Top Stories</h2>
+            <ul id="top-stories-list"></ul>
+            <h2>Best Stories</h2>
+            <ul id="best-stories-list"></ul>
+        </aside>
+    </div>
+    <script src="scripts.js"></script>
 </body>
 </html>

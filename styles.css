@@ -140,24 +140,61 @@ body {
     text-decoration: underline;
   }
   
-  /* styles.css */
+ /* styles.css */
+.container {
+  display: flex;
+  justify-content: space-between;
+}
+
+main {
+  flex: 1;
+  padding: 20px;
+}
+
+aside {
+  width: 300px;
+  padding: 20px;
+  border-left: 1px solid #ccc;
+}
+
+aside h2 {
+  margin-top: 0;
+}
+
+aside ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+aside ul li {
+  margin-bottom: 10px;
+}
+
+aside ul li a {
+  text-decoration: none;
+  color: #007bff;
+}
+
+aside ul li a:hover {
+  text-decoration: underline;
+}
+
 #live-updates-banner {
-    background-color: #4a90e2;
-    color: white;
-    padding: 10px;
-    text-align: center;
-    display: none;
-  }
-  
-  #live-updates-banner button {
-    background-color: white;
-    color: #4a90e2;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  
-  #live-updates-banner button:hover {
-    background-color: #e5e5e5;
-  }
-  
+  background-color: #4a90e2;
+  color: white;
+  padding: 10px;
+  text-align: center;
+  display: none;
+}
+
+#live-updates-banner button {
+  background-color: white;
+  color: #4a90e2;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+#live-updates-banner button:hover {
+  background-color: #e5e5e5;
+}

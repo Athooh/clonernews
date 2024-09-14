@@ -144,7 +144,6 @@ const handleCommentActions = async (event) => {
 };
 
 
-
 const loadPosts = async () => {
   const posts = await fetchPosts(currentPostType, loadedPosts, loadedPosts + POSTS_PER_PAGE);
   

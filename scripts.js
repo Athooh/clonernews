@@ -107,21 +107,43 @@ const loadComments = async (postId, commentContainer, depth = 0) => {
 
 const handleCommentActions = async (event) => {
   event.preventDefault();
+  
+  // Prevent event bubbling from affecting other comment sections
+  event.stopPropagation();
+
   if (event.target.classList.contains('toggle-replies')) {
     const replyId = event.target.getAttribute('data-id');
     const replyContainer = document.getElementById(`replies-${replyId}`);
+    
+    // Toggle replies visibility
     if (replyContainer.innerHTML === '') {
       const reply = await fetchItem(replyId);
       if (reply.kids) {
-        await loadComments(replyId, replyContainer, 1);
+        await loadComments(replyId, replyContainer, 1); // Load nested comments
       }
-      event.target.textContent = 'Hide Replies';
+      event.target.textContent = 'Hide Replies'; // Update to 'Hide Replies'
     } else {
-      replyContainer.innerHTML = '';
-      event.target.textContent = `Show Replies (${reply.kids.length})`;
+      replyContainer.innerHTML = ''; // Clear nested comments
+      event.target.textContent = 'Show Replies'; // Update to 'Show Replies'
     }
   }
-}
+
+  // Handling the toggle of parent comments
+  if (event.target.classList.contains('toggle-comments')) {
+    const postId = event.target.getAttribute('data-id');
+    const commentContainer = document.getElementById(`comments-${postId}`);
+
+    if (commentContainer.innerHTML === '') {
+      await loadComments(postId, commentContainer); // Load parent comments
+      event.target.textContent = 'Hide Comments'; // Update to 'Hide Comments'
+    } else {
+      commentContainer.innerHTML = ''; // Clear parent comments
+      event.target.textContent = 'Show Comments'; // Update to 'Show Comments'
+    }
+  }
+};
+
+
 
 const loadPosts = async () => {
   const posts = await fetchPosts(currentPostType, loadedPosts, loadedPosts + POSTS_PER_PAGE);
@@ -167,7 +189,7 @@ const showNotification = (message) => {
   notification.style.display = 'block';
   setTimeout(() => {
     notification.style.display = 'none';
-  }, 3000);
+  }, 5000);
 }
 
 const checkForUpdates = async () => {
@@ -248,31 +270,3 @@ const fetchSidebarPosts = async (postType, listId) => {
     console.error('Error fetching sidebar posts:', error);
   }
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  const notificationIcon = document.getElementById('notification-icon');
-  const notificationCount = document.getElementById('notification-count');
-  let updatesCount = 0;
-
-  // Function to simulate receiving new updates
-  function fetchNewUpdates() {
-    // Simulate receiving new updates
-    updatesCount = Math.floor(Math.random() * 10) + 1;
-    notificationCount.textContent = updatesCount;
-    notificationIcon.style.display = 'flex'; // Show notification icon
-  }
-
-  // Function to hide the notification icon
-  function hideNotification() {
-    notificationIcon.style.display = 'none';
-  }
-
-  // Show notification every 5 seconds
-  setInterval(() => {
-    fetchNewUpdates();
-    setTimeout(hideNotification, 3000); // Hide after 3 seconds
-  }, 5000); // Update every 5 seconds
-
-  // Initialize
-  fetchNewUpdates();
-});

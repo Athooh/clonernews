@@ -1,86 +1,161 @@
+/* General styling */
 body {
-  font-family: Arial, sans-serif;
-  line-height: 1.6;
-  color: #333;
-  width: 90%;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f0f2f5;
+  font-family: 'Roboto', sans-serif;
+  color: #3a3a3a;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f9fa;
 }
 
 header {
-  background-color: #1877f2;
-  color: white;
+  background-color: #3b5998;
+  color: #fff;
   text-align: center;
-  padding: 1rem;
-  margin-bottom: 2rem;
-  position: relative; /* Position relative for notification icon */
+  padding: 20px;
+  font-size: 2rem;
+  letter-spacing: 2px;
 }
 
 nav {
   display: flex;
-  justify-content: space-around;
-  margin-bottom: 1rem;
-  background-color: white;
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  justify-content: center;
+  background-color: #fff;
+  padding: 10px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 nav a {
-  color: #1877f2;
+  color: #3b5998;
+  margin: 0 20px;
+  font-size: 1.1rem;
   text-decoration: none;
-  font-weight: bold;
+  font-weight: 500;
 }
 
-.post {
-  background-color: white;
-  border: 1px solid #ddd;
-  padding: 1rem;
-  margin-bottom: 1rem;
+nav a:hover {
+  color: #ff9800;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+main {
+  flex: 1;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.post h2 {
-  margin-top: 0;
-  color: #1877f2;
+aside.sidebar {
+  width: 20%;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
-.post-meta {
-  font-size: 0.8rem;
-  color: #65676b;
+.left-sidebar {
+  background-color: #f4f6f8;
 }
 
+.right-sidebar {
+  background-color: #f4f6f8;
+}
+
+/* Sidebar section titles */
+.sidebar h3 {
+  font-size: 1.2rem;
+  color: #3b5998;
+  margin-bottom: 10px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.sidebar li {
+  margin-bottom: 8px;
+}
+
+.sidebar a {
+  color: #3a3a3a;
+  text-decoration: none;
+}
+
+.sidebar a:hover {
+  color: #ff9800;
+}
+
+/* Load More button */
+.load-more {
+  display: block;
+  margin: 20px auto;
+  padding: 12px;
+  background-color: #3b5998;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.load-more:hover {
+  background-color: #ff9800;
+}
+
+/* Notification */
+#notification {
+  display: none;
+  background-color: #3b5;
+  color: white;
+  text-align: center;
+  padding: 10px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  font-size: 1rem;
+}
+
+/* Comments styling */
 .comments {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 }
 
 .comment {
-  background-color: #f2f3f5;
-  border-radius: 18px;
-  padding: 12px;
-  margin-bottom: 10px;
+  background-color: #e1e9f7;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
   position: relative;
-}
-
-.comment-content {
-  margin-left: 40px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .comment-avatar {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background-color: #dfe3ee;
+  background-color: #fff;
+  border: 2px solid #3b5998;
   position: absolute;
-  left: 8px;
+  left: -50px;
   top: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  color: #1877f2;
+  color: #3b5998;
+}
+
+.comment-content {
+  margin-left: 60px;
+  font-size: 1rem;
 }
 
 .nested-comments {
@@ -91,128 +166,40 @@ nav a {
 
 .comment-actions {
   margin-top: 5px;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
+  color: #3b5998;
 }
 
 .comment-actions a {
-  color: #65676b;
-  text-decoration: none;
-  margin-right: 10px;
+  color: #ff9800;
+  margin-right: 12px;
 }
 
-.load-more {
-  display: block;
-  width: 100%;
-  padding: 0.5rem;
-  background-color: #1877f2;
-  color: white;
-  text-align: center;
-  text-decoration: none;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 1rem;
+.comment-actions a:hover {
+  text-decoration: underline;
 }
 
-.live-updates {
-  background-color: white;
-  border: 1px solid #ddd;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  overflow-wrap: break-word; /* Ensure content wraps */
-}
-
-.stories-updates {
-  background-color: #f2f3f5;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 5px;
-}
-
-#notification {
-  display: none;
-  background-color: #1877f2;
-  color: white;
-  text-align: center;
-  padding: 10px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-}
-
-.toggle-comments {
-  cursor: pointer;
-  color: #1877f2;
-  font-weight: bold;
-}
-
-.poll-options {
-  margin-top: 10px;
-}
-
+/* Poll option styling */
 .poll-option {
-  background-color: #f2f3f5;
-  padding: 10px;
+  background-color: #e9f3ff;
+  padding: 12px;
   margin-bottom: 5px;
   border-radius: 5px;
+  font-weight: bold;
 }
 
 .poll-option-score {
-  font-weight: bold;
-  color: #1877f2;
+  color: #3b5998;
+  font-size: 1rem;
 }
 
-.container {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
+.live-updates ul, .stories-updates ul {
+  padding: 0;
+  margin: 0;
+  list-style-type: disc;
 }
 
-main {
-  width: 70%;
-}
-
-aside.sidebar {
-  width: 20%;
-  background-color: #f2f3f5; /* Ensure background color for sidebar */
-}
-
-.notification-icon {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  background-color: #f2f3f5;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  font-size: 20px; /* Adjust size of the icon */
-}
-
-.notification-icon .fa-bell {
-  color: #1877f2;
-}
-
-.notification-count {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  background-color: #ff0000;
-  color: white;
-  font-size: 12px;
-  font-weight: bold;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.live-updates li, .stories-updates li {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }

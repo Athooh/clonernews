@@ -1,185 +1,211 @@
-// scripts.js
-document.addEventListener("DOMContentLoaded", () => {
-  const newsList = document.getElementById("news-list");
-  const loadMoreBtn = document.getElementById("load-more");
-  const liveUpdatesBanner = document.getElementById("live-updates-banner");
-  const refreshBtn = document.getElementById("refresh-btn");
-  const newStoriesList = document.getElementById("new-stories-list");
-  const topStoriesList = document.getElementById("top-stories-list");
-  const bestStoriesList = document.getElementById("best-stories-list");
-  let currentPostIndex = 0;
-  const postsPerPage = 5;
-  let topStoryIds = [];
-  let latestPostId = null;
-  let isFetching = false;
+const API_BASE_URL = 'https://hacker-news.firebaseio.com/v0/';
+let currentPostType = 'topstories';
+let loadedPosts = 0;
+const POSTS_PER_PAGE = 10;
+let lastUpdateTime = Date.now();
 
-  liveUpdatesBanner.style.display = 'none'; // Hide banner initially
-
-  // Fetch top stories initially
-  function fetchTopStories() {
-    if (isFetching) return;
-    isFetching = true;
-    fetch("https://hacker-news.firebaseio.com/v0/topstories.json")
-      .then(response => response.json())
-      .then(storyIds => {
-        topStoryIds = storyIds;
-        latestPostId = topStoryIds[0]; // Record the latest post
-        loadMorePosts();
-        isFetching = false;
-      })
-      .catch(error => {
-        console.error("Error fetching top stories:", error);
-        isFetching = false;
-      });
+const throttle = (func, limit) => {
+  let inThrottle;
+  return function() {
+    const args = arguments;
+    const context = this;
+    if (!inThrottle) {
+      func.apply(context, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
   }
+}
 
-  // Fetch new stories
-  function fetchNewStories() {
-    fetch("https://hacker-news.firebaseio.com/v0/newstories.json")
-      .then(response => response.json())
-      .then(storyIds => {
-        displayStories(storyIds, newStoriesList);
-      })
-      .catch(error => console.error("Error fetching new stories:", error));
+const fetchItem = async (id) => {
+  const response = await axios.get(`${API_BASE_URL}item/${id}.json`);
+  return response.data;
+}
+
+const fetchPosts = async (postType, start, end) => {
+  const response = await axios.get(`${API_BASE_URL}${postType}.json`);
+  const postIds = response.data.slice(start, end);
+  return Promise.all(postIds.map(fetchItem));
+}
+
+const renderPost = (post) => {
+  const postElement = document.createElement('div');
+  postElement.className = 'post';
+  postElement.innerHTML = `
+    <h2><a href="${post.url || `https://news.ycombinator.com/item?id=${post.id}`}" target="_blank">${post.title}</a></h2>
+    <p class="post-meta">By ${post.by} | ${new Date(post.time * 1000).toLocaleString()} | ${post.score} points</p>
+    ${post.text ? `<p>${post.text}</p>` : ''}
+    ${renderPostSpecificContent(post)}
+    <a href="#" class="toggle-comments" data-id="${post.id}">Show Comments (${post.descendants || 0})</a>
+    <div class="comments" id="comments-${post.id}"></div>
+  `;
+  return postElement;
+}
+
+const renderPostSpecificContent = (post) => {
+  if (post.type === 'job') {
+    return `<p><strong>Job Posting:</strong> ${post.text || 'No description available.'}</p>`;
+  } else if (post.type === 'poll') {
+    return renderPollContent(post);
   }
+  return '';
+}
 
-  // Fetch best stories
-  function fetchBestStories() {
-    fetch("https://hacker-news.firebaseio.com/v0/beststories.json")
-      .then(response => response.json())
-      .then(storyIds => {
-        displayStories(storyIds, bestStoriesList);
-      })
-      .catch(error => console.error("Error fetching best stories:", error));
-  }
+const renderPollContent = (poll) => {
+  if (!poll.parts || poll.parts.length === 0) return '';
+  
+  let pollContent = '<div class="poll-options">';
+  poll.parts.forEach(optionId => {
+    pollContent += `<div class="poll-option" id="poll-option-${optionId}">Loading option...</div>`;
+  });
+  pollContent += '</div>';
+  
+  // Load poll options asynchronously
+  poll.parts.forEach(async (optionId) => {
+    const option = await fetchItem(optionId);
+    const optionElement = document.getElementById(`poll-option-${optionId}`);
+    if (optionElement) {
+      optionElement.innerHTML = `
+        <p>${option.text}</p>
+        <p class="poll-option-score">${option.score} votes</p>
+      `;
+    }
+  });
+  
+  return pollContent;
+}
 
-  // Display stories in the sidebar
-  function displayStories(storyIds, listElement) {
-    listElement.innerHTML = ''; // Clear existing list
-    storyIds.slice(0, 10).forEach(storyId => {
-      fetch(`https://hacker-news.firebaseio.com/v0/item/${storyId}.json`)
-        .then(response => response.json())
-        .then(story => {
-          const listItem = document.createElement("li");
-          listItem.innerHTML = `<a href="${story.url}" target="_blank">${story.title}</a>`;
-          listElement.appendChild(listItem);
-        })
-        .catch(error => console.error("Error fetching story details:", error));
-    });
-  }
-
-  // Fetch individual post details
-  function fetchPostDetails(id) {
-    fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`)
-      .then(response => response.json())
-      .then(post => {
-        displayPost(post);
-      })
-      .catch(error => console.error("Error fetching post:", error));
-  }
-
-  // Display post in HTML
-  function displayPost(post) {
-    const postItem = document.createElement("li");
-    postItem.innerHTML = `
-      <a href="${post.url}" target="_blank">${post.title}</a>
-      <p>By: ${post.by} | Points: ${post.score} | ${post.descendants || 0} comments</p>
-      <div class="comment-section">
-        ${getLatestComment(post)}
-        <span id="see-more-comments" class="comment-toggle" data-post-id="${post.id}">See more comments</span>
+const renderComment = (comment, depth = 0) => {
+  if (comment.deleted || comment.dead) return '';
+  const avatar = comment.by.charAt(0).toUpperCase();
+  return `
+    <div class="comment" style="margin-left: ${depth * 20}px;">
+      <div class="comment-avatar">${avatar}</div>
+      <div class="comment-content">
+        <p class="post-meta">${comment.by}</p>
+        <p>${comment.text}</p>
+        <div class="comment-actions">
+          <a href="#" class="like-comment">Like</a>
+          <a href="#" class="reply-comment">Reply</a>
+          ${comment.kids ? `<a href="#" class="toggle-replies" data-id="${comment.id}">Show Replies (${comment.kids.length})</a>` : ''}
+        </div>
       </div>
-    `;
-    newsList.appendChild(postItem);
+      ${comment.kids ? `<div class="nested-comments" id="replies-${comment.id}"></div>` : ''}
+    </div>
+  `;
+}
 
-    // "See more comments" event
-    const toggleLink = postItem.querySelector("#see-more-comments");
-    toggleLink.addEventListener("click", function () {
-      const postId = this.getAttribute("data-post-id");
-      if (toggleLink.innerText === "See more comments") {
-        fetchMoreComments(postId, postItem);
-      } else {
-        minimizeComments(postItem);
+const loadComments = async (postId, commentContainer, depth = 0) => {
+  const post = await fetchItem(postId);
+  if (post.kids) {
+    const comments = await Promise.all(post.kids.map(fetchItem));
+    commentContainer.innerHTML = comments.map(comment => renderComment(comment, depth)).join('');
+    commentContainer.addEventListener('click', handleCommentActions);
+  }
+}
+
+const handleCommentActions = async (event) => {
+  event.preventDefault();
+  if (event.target.classList.contains('toggle-replies')) {
+    const replyId = event.target.getAttribute('data-id');
+    const replyContainer = document.getElementById(`replies-${replyId}`);
+    if (replyContainer.innerHTML === '') {
+      const reply = await fetchItem(replyId);
+      if (reply.kids) {
+        await loadComments(replyId, replyContainer, 1);
       }
+      event.target.textContent = 'Hide Replies';
+    } else {
+      replyContainer.innerHTML = '';
+      event.target.textContent = `Show Replies (${reply.kids.length})`;
+    }
+  }
+}
+
+const loadPosts = async () => {
+  const posts = await fetchPosts(currentPostType, loadedPosts, loadedPosts + POSTS_PER_PAGE);
+  const mainContent = document.getElementById('main-content');
+  posts.forEach(post => {
+    mainContent.appendChild(renderPost(post));
+  });
+  loadedPosts += POSTS_PER_PAGE;
+}
+
+const handleNavClick = (event) => {
+  event.preventDefault();
+  const clickedNav = event.target.id.split('-')[1];
+  switch (clickedNav) {
+    case 'jobs':
+      currentPostType = 'jobstories';
+      break;
+    case 'polls':
+      currentPostType = 'pollstories';
+      break;
+    case 'ask':
+      currentPostType = 'askstories';
+      break;
+    case 'show':
+      currentPostType = 'showstories';
+      break;
+    default:
+      currentPostType = 'topstories';
+  }
+  document.getElementById('main-content').innerHTML = '';
+  loadedPosts = 0;
+  loadPosts();
+}
+
+const showNotification = (message) => {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.style.display = 'block';
+  setTimeout(() => {
+    notification.style.display = 'none';
+  }, 3000);
+}
+
+const checkForUpdates = async () => {
+  const response = await axios.get(`${API_BASE_URL}updates.json`);
+  const updates = response.data;
+  
+  if (updates.items.length > 0 || updates.profiles.length > 0) {
+    const updateTime = Date.now();
+    if (updateTime - lastUpdateTime >= 5000) {
+      showNotification('New updates available!');
+      lastUpdateTime = updateTime;
+    }
+    
+    const updatesList = document.getElementById('live-updates-list');
+    updatesList.innerHTML = '';
+    updates.items.slice(0, 5).forEach(async (itemId) => {
+      const item = await fetchItem(itemId);
+      const li = document.createElement('li');
+      li.textContent = `${item.type}: ${item.title || item.text}`;
+      updatesList.appendChild(li);
     });
   }
+}
 
-  // Get the latest comment (if any)
-  function getLatestComment(post) {
-    if (post.kids && post.kids.length > 0) {
-      return `<div class="comment" id="comment-${post.id}">
-                <div class="comment-header">
-                  <span class="author">Author</span>
-                  <span class="timestamp">Just now</span>
-                </div>
-                <p>This is a sample comment</p>
-              </div>`;
+document.addEventListener('DOMContentLoaded', () => {
+  loadPosts();
+  document.querySelectorAll('nav a').forEach(navItem => {
+    navItem.addEventListener('click', handleNavClick);
+  });
+  document.getElementById('load-more').addEventListener('click', loadPosts);
+  document.getElementById('main-content').addEventListener('click', async (event) => {
+    if (event.target.classList.contains('toggle-comments')) {
+      event.preventDefault();
+      const postId = event.target.getAttribute('data-id');
+      const commentContainer = document.getElementById(`comments-${postId}`);
+      if (commentContainer.innerHTML === '') {
+        await loadComments(postId, commentContainer);
+        event.target.textContent = 'Hide Comments';
+      } else {
+        commentContainer.innerHTML = '';
+        event.target.textContent = `Show Comments`;
+      }
     }
-    return '';
-  }
-
-  // Fetch more comments and append them
-  function fetchMoreComments(postId, postItem) {
-    fetch(`https://hacker-news.firebaseio.com/v0/item/${postId}.json`)
-      .then(response => response.json())
-      .then(post => {
-        post.kids.forEach(commentId => fetchComment(commentId, postItem));
-        // Change "See more comments" to "Minimize comments"
-        const toggleLink = postItem.querySelector("#see-more-comments");
-        toggleLink.innerText = "Minimize comments";
-      });
-  }
-
-  // Fetch comment details
-  function fetchComment(commentId, postItem) {
-    fetch(`https://hacker-news.firebaseio.com/v0/item/${commentId}.json`)
-      .then(response => response.json())
-      .then(comment => {
-        const commentHTML = `
-          <div class="comment additional-comment">
-            <div class="comment-header">
-              <span class="author">${comment.by}</span>
-              <span class="timestamp">${new Date(comment.time * 1000).toLocaleTimeString()}</span>
-            </div>
-            <p>${comment.text}</p>
-          </div>
-        `;
-        postItem.querySelector(".comment-section").insertAdjacentHTML('beforeend', commentHTML);
-      });
-  }
-
-  // Minimize comments, showing only the latest one
-  function minimizeComments(postItem) {
-    // Remove all additional comments
-    const additionalComments = postItem.querySelectorAll(".additional-comment");
-    additionalComments.forEach(comment => comment.remove());
-
-    // Change "Minimize comments" back to "See more comments"
-    const toggleLink = postItem.querySelector("#see-more-comments");
-    toggleLink.innerText = "See more comments";
-  }
-
-  // Load more posts on button click
-  loadMoreBtn.addEventListener("click", loadMorePosts);
-
-  // Load more posts function
-  function loadMorePosts() {
-    const storiesToLoad = topStoryIds.slice(currentPostIndex, currentPostIndex + postsPerPage);
-    storiesToLoad.forEach(storyId => fetchPostDetails(storyId));
-    currentPostIndex += postsPerPage;
-
-    if (currentPostIndex >= topStoryIds.length) {
-      loadMoreBtn.style.display = 'none'; // Hide button when no more posts
-    }
-  }
-
-  // Refresh button to fetch new posts
-  refreshBtn.addEventListener("click", () => {
-    liveUpdatesBanner.style.display = 'none'; // Hide banner
-    fetchTopStories(); // Refetch top stories
   });
 
-  // Initial data fetch
-  fetchTopStories();
-  fetchNewStories();
-  fetchBestStories();
+  setInterval(throttle(checkForUpdates, 5000), 5000);
 });

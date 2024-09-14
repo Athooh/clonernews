@@ -1,31 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hacker News Feed</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <title>clonernews</title>
 </head>
 <body>
-    <div class="container">
-        <main>
-            <!-- Main content area for posts -->
-            <h1>Hacker News Feed</h1>
-            <ul id="news-list"></ul>
-            <button id="load-more">Load More</button>
-            <div id="live-updates-banner">
-                New updates are available! <button id="refresh-btn">Refresh</button>
-            </div>
-        </main>
-        <aside id="sidebar">
-            <h2>New Stories</h2>
-            <ul id="new-stories-list"></ul>
-            <h2>Top Stories</h2>
-            <ul id="top-stories-list"></ul>
-            <h2>Best Stories</h2>
-            <ul id="best-stories-list"></ul>
-        </aside>
-    </div>
-    <script src="scripts.js"></script>
+<header>
+  <h1>ClonerNews</h1>
+</header>
+
+<nav>
+  <a href="#" id="nav-stories">Stories</a>
+  <a href="#" id="nav-jobs">Jobs</a>
+  <a href="#" id="nav-polls">Polls</a>
+  <a href="#" id="nav-ask">Ask HN</a>
+  <a href="#" id="nav-show">Show HN</a>
+</nav>
+
+<main id="main-content">
+  <!-- Content will be dynamically loaded here -->
+</main>
+
+<button id="load-more" class="load-more">Load More</button>
+
+<div class="live-updates">
+  <h3>Live Updates</h3>
+  <ul id="live-updates-list"></ul>
+</div>
+
+<div id="notification"></div>
+
 </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+<script src="scripts.js"></script>
 </html>

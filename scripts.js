@@ -3,6 +3,7 @@ let currentPostType = 'topstories';
 let loadedPosts = 0;
 const POSTS_PER_PAGE = 10;
 let lastUpdateTime = Date.now();
+let loadedPostIds = new Set();
 
 const throttle = (func, limit) => {
   let inThrottle;
@@ -124,10 +125,14 @@ const handleCommentActions = async (event) => {
 
 const loadPosts = async () => {
   const posts = await fetchPosts(currentPostType, loadedPosts, loadedPosts + POSTS_PER_PAGE);
-  const mainContent = document.getElementById('main-content');
+  
   posts.forEach(post => {
-    mainContent.appendChild(renderPost(post));
+    if (!loadedPostIds.has(post.id)) {
+      loadedPostIds.add(post.id);
+      document.getElementById('main-content').appendChild(renderPost(post));
+    }
   });
+  
   loadedPosts += POSTS_PER_PAGE;
 }
 
@@ -152,6 +157,7 @@ const handleNavClick = (event) => {
   }
   document.getElementById('main-content').innerHTML = '';
   loadedPosts = 0;
+  loadedPostIds.clear();
   loadPosts();
 }
 
@@ -167,7 +173,7 @@ const showNotification = (message) => {
 const checkForUpdates = async () => {
   const response = await axios.get(`${API_BASE_URL}updates.json`);
   const updates = response.data;
-  
+
   if (updates.items.length > 0 || updates.profiles.length > 0) {
     const updateTime = Date.now();
     if (updateTime - lastUpdateTime >= 5000) {
@@ -177,17 +183,26 @@ const checkForUpdates = async () => {
     
     const updatesList = document.getElementById('live-updates-list');
     updatesList.innerHTML = '';
-    updates.items.slice(0, 5).forEach(async (itemId) => {
+    
+    const newPosts = [];
+    for (const itemId of updates.items) {
       const item = await fetchItem(itemId);
+      if (!loadedPostIds.has(item.id)) {
+        newPosts.push(item);
+      }
+    }
+    
+    newPosts.slice(0, 5).forEach(post => {
       const li = document.createElement('li');
-      li.textContent = `${item.type}: ${item.title || item.text}`;
+      li.textContent = `${post.type}: ${post.title || post.text}`;
       updatesList.appendChild(li);
+      loadedPostIds.add(post.id);
     });
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  loadPosts();
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadPosts();
   document.querySelectorAll('nav a').forEach(navItem => {
     navItem.addEventListener('click', handleNavClick);
   });
@@ -207,5 +222,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Initialize sidebar with top, new, and best stories
+  fetchSidebarPosts('topstories', 'top-stories-list');
+  fetchSidebarPosts('newstories', 'new-stories-list');
+  fetchSidebarPosts('beststories', 'best-stories-list');
+  
+  // Load existing post IDs
+  const initialPosts = await fetchPosts(currentPostType, 0, POSTS_PER_PAGE);
+  initialPosts.forEach(post => loadedPostIds.add(post.id));
+
   setInterval(throttle(checkForUpdates, 5000), 5000);
+});
+
+const fetchSidebarPosts = async (postType, listId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}${postType}.json`);
+    const postIds = response.data.slice(0, 10); // Limit to 10 posts for the sidebar
+    const posts = await Promise.all(postIds.map(fetchItem));
+    
+    const list = document.getElementById(listId);
+    list.innerHTML = posts.map(post => `
+      <li><a href="${post.url || `https://news.ycombinator.com/item?id=${post.id}`}" target="_blank">${post.title}</a></li>
+    `).join('');
+  } catch (error) {
+    console.error('Error fetching sidebar posts:', error);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const notificationIcon = document.getElementById('notification-icon');
+  const notificationCount = document.getElementById('notification-count');
+  let updatesCount = 0;
+
+  // Function to simulate receiving new updates
+  function fetchNewUpdates() {
+    // Simulate receiving new updates
+    updatesCount = Math.floor(Math.random() * 10) + 1;
+    notificationCount.textContent = updatesCount;
+    notificationIcon.style.display = 'flex'; // Show notification icon
+  }
+
+  // Function to hide the notification icon
+  function hideNotification() {
+    notificationIcon.style.display = 'none';
+  }
+
+  // Show notification every 5 seconds
+  setInterval(() => {
+    fetchNewUpdates();
+    setTimeout(hideNotification, 3000); // Hide after 3 seconds
+  }, 5000); // Update every 5 seconds
+
+  // Initialize
+  fetchNewUpdates();
 });

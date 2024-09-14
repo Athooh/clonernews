@@ -2,7 +2,7 @@ body {
   font-family: Arial, sans-serif;
   line-height: 1.6;
   color: #333;
-  max-width: 800px;
+  width: 90%;
   margin: 0 auto;
   padding: 20px;
   background-color: #f0f2f5;
@@ -14,6 +14,7 @@ header {
   text-align: center;
   padding: 1rem;
   margin-bottom: 2rem;
+  position: relative; /* Position relative for notification icon */
 }
 
 nav {
@@ -117,9 +118,16 @@ nav a {
   background-color: white;
   border: 1px solid #ddd;
   padding: 1rem;
-  margin-top: 2rem;
   border-radius: 8px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  overflow-wrap: break-word; /* Ensure content wraps */
+}
+
+.stories-updates {
+  background-color: #f2f3f5;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 5px;
 }
 
 #notification {
@@ -155,4 +163,56 @@ nav a {
 .poll-option-score {
   font-weight: bold;
   color: #1877f2;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+main {
+  width: 70%;
+}
+
+aside.sidebar {
+  width: 20%;
+  background-color: #f2f3f5; /* Ensure background color for sidebar */
+}
+
+.notification-icon {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  background-color: #f2f3f5;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  font-size: 20px; /* Adjust size of the icon */
+}
+
+.notification-icon .fa-bell {
+  color: #1877f2;
+}
+
+.notification-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #ff0000;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

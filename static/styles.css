@@ -62,6 +62,9 @@ main {
 .post p.post-meta {
   display: block;
 }
+.poll-option {
+  display: none;
+}
 
 .comments p {
   display: block;

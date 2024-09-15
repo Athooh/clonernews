@@ -50,6 +50,14 @@ main {
   border-radius: 8px;
 }
 
+.post p {
+  display: none;
+}
+
+.post p.post-meta {
+  display: block;
+}
+
 aside.sidebar {
   width: 20%;
   padding: 20px;

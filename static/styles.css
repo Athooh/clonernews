@@ -59,6 +59,10 @@ main {
   display: block;
 }
 
+.comments p {
+  display: block;
+}
+
 aside.sidebar {
   width: 20%;
   padding: 20px;
@@ -238,5 +242,8 @@ aside.sidebar {
   nav a {
     font-size: 0.9rem;
     margin-inline: 10px;
+  }
+  .comment-content p {
+    font-size: 13px;
   }
 }

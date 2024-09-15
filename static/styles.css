@@ -221,6 +221,14 @@ aside.sidebar {
   overflow-wrap: break-word;
 }
 
+.comment-actions {
+  font-size: 12px;
+}
+
+a.toggle-comments {
+  font-size: .9rem;
+}
+
 @media (max-width: 768px) {
   aside.sidebar {
     display: none;
@@ -251,8 +259,16 @@ aside.sidebar {
     font-size: 0.9rem;
     margin-inline: 10px;
   }
+  .comment-content {
+    margin-left: 10px;
+  }
+
   .comment-content p {
     font-size: 13px;
+  }
+
+  .comment  p {
+    padding-left: 10px;
   }
 
   #main-content a {

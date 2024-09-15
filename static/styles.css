@@ -5,6 +5,7 @@ body {
   margin: 0;
   padding: 0;
   background-color: #f8f9fa;
+  max-width: 100%;
 }
 
 header {
@@ -210,4 +211,32 @@ aside.sidebar {
 .live-updates li, .stories-updates li {
   word-wrap: break-word;
   overflow-wrap: break-word;
+}
+
+@media (max-width: 768px) {
+  aside.sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 599px) {
+  aside.sidebar {
+    display: none;
+  }
+  header {
+    max-width: 100%;
+  }
+
+  header h1 {
+    font-size: 1.8rem;
+  }
+
+  nav {
+    width: 100%;
+  }
+
+  nav a {
+    font-size: 0.9rem;
+    margin-inline: 10px;
+  }
 }

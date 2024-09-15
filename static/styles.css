@@ -51,6 +51,10 @@ main {
   border-radius: 8px;
 }
 
+#main-content a {
+  color: #3b5998;
+}
+
 .post p {
   display: none;
 }
@@ -221,6 +225,10 @@ aside.sidebar {
   aside.sidebar {
     display: none;
   }
+
+  #main-content a {
+    font-size: 20px;
+  }
 }
 
 @media (max-width: 599px) {
@@ -245,5 +253,9 @@ aside.sidebar {
   }
   .comment-content p {
     font-size: 13px;
+  }
+
+  #main-content a {
+    font-size: 18px;
   }
 }
